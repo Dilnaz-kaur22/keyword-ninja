@@ -4,7 +4,7 @@
 
 Want to test your typing skills.
 
-You'll have 99 seconds to do so...
+You'll have 90 seconds to do so...
 
 Click [me](https://dilnaz-kaur22.github.io/keyword-ninja/)
 
