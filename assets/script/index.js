@@ -1,196 +1,198 @@
 'use strict';
 
-const words = [
-  'dinosaur', 'love', 'pineapple', 'calendar', 'robot', 'building',
-  'population', 'weather', 'bottle', 'history', 'dream', 'character', 'money',
-  'absolute', 'discipline', 'machine', 'accurate', 'connection', 'rainbow',
-  'bicycle', 'eclipse', 'calculator', 'trouble', 'watermelon', 'developer',
-  'philosophy', 'database', 'periodic', 'capitalism', 'abominable', 'component',
-  'future', 'pasta', 'microwave', 'jungle', 'wallet', 'canada', 'coffee',
-  'beauty', 'agency', 'chocolate', 'eleven', 'technology', 'alphabet',
-  'knowledge', 'magician', 'professor', 'triangle', 'earthquake', 'baseball',
-  'beyond', 'evolution', 'banana', 'perfumer', 'computer', 'management',
-  'discovery', 'ambition', 'music', 'eagle', 'crown', 'chess', 'laptop',
-  'bedroom', 'delivery', 'enemy', 'button', 'superman', 'library', 'unboxing',
-  'bookstore', 'language', 'homework', 'fantastic', 'economy', 'interview',
-  'awesome', 'challenge', 'science', 'mystery', 'famous', 'league', 'memory',
-  'leather', 'planet', 'software', 'update', 'yellow', 'keyboard', 'window'
-];
+/*
+    DILNAZ KAUR
+*/
+function onEvent(event, selector, callback) {
+  return selector.addEventListener(event, callback);
+}
+function getElement(selector, parent = document) {
+  return parent.getElementById(selector);
+}
 
-const timer = document.querySelector('.timer');
-const title = document.querySelector('.title');
-const play = document.querySelector('.play-button');
-const box = document.querySelector('.box');
-const word = document.querySelector('.word');
-const input = document.querySelector('.input');
-const score = document.querySelector('.score');
-const playAgain = document.querySelector('.play-again-button');
+function select(selector, parent = document) {
+  return parent.querySelector(selector);
+}
 
-const music = new Audio('./assets/audio/bg-music.mp3');
-music.loop = true;
-music.type = 'audio/mp3';
 
-const correctAnswer = new Audio('./assets/audio/correct.mp3');
-correctAnswer.type = 'audio/wav';
+const timer = select('.timer');
+const input = select('.input');
+const btn2 = select('.btn2');
+const btn = select('.btn');
+const bigBox = select('.big-box');
+const words = select('.words');
+const hitss = select('.hits');
+const gameOver = select('.restart');
+const heading = select('h2');
+const good = select('.date');
+const showInfo = select('.info');
+const game = select('.game');
+const mesg = select('.mesg');
+const startInfo = select('.start-info');
+const round = select('.round');
+const btnScore = select('.display-score');
+const dialog = select('dialog');
+const dialogClose = select('.close');
+const list = select('.list');
+const noDataMesg = select('.no-data');
 
-const wrongAnswer = new Audio('./assets/audio/wrong.mp3');
-wrongAnswer.type = 'audio/mp3';
 
-class Score {
-  #date;
-  #hits;
-  #perc;
-  
-  constructor(date, hits, perc) {
-    this.#date = date;
-    this.hits = hits;
-    this.#perc = perc;
-  };
-  
-  set date(date) {this.#date = date;};
-  set hits(hits) {this.#hits = hits;};
-  set perc(perc) {this.#perc = perc;};
-  
-  get date() {return this.#date;};
-  get hits() {return this.#hits;};
-  get perc() {return this.#perc};
-  
-  getPercentage() {
-    this.#perc = (this.#hits * 100) / 90;
-  };
-  
-  getScore() {
-    return `${this.#date} | Hits: ${this.#hits} | ${this.#perc.toFixed(2)}%`;
-  };
+
+const onHits = new Audio('./assets/audio/correct.mp3');
+onHits.type = 'audio/mp3';
+const gameLoad = new Audio('./assets/audio/load.mp3');
+gameLoad.type = 'audio/mp3';
+const gameLevel = new Audio('./assets/audio/bg-music.mp3');
+gameLevel.type = 'audio/mp3';
+const gameIsOver = new Audio('./assets/audio/game-over.mp3');
+gameIsOver.type = 'audio/mp3';
+
+const gameWords2 = ['dinosaur', 'love', 'pineapple', 'calendar', 'robot', 'building', 'population', 
+'weather', 'bottle', 'history', 'dream', 'character', 'money', 'absolute', 
+'discipline', 'machine', 'accurate', 'connection', 'rainbow', 'bicycle', 
+'eclipse', 'calculator', 'trouble', 'watermelon', 'developer', 'philosophy', 
+'database', 'periodic', 'capitalism', 'abominable', 'component', 'future', 
+'pasta', 'microwave', 'jungle', 'wallet', 'canada', 'coffee', 'beauty', 'agency', 
+'chocolate', 'eleven', 'technology', 'alphabet', 'knowledge', 'magician', 
+'professor', 'triangle', 'earthquake', 'baseball', 'beyond', 'evolution', 
+'banana', 'perfumer', 'computer', 'management', 'discovery', 'ambition', 'music', 
+'eagle', 'crown', 'chess', 'laptop', 'bedroom', 'delivery', 'enemy', 'button',
+'superman', 'library', 'unboxing', 'bookstore', 'language', 'homework', 
+'fantastic', 'economy', 'interview', 'awesome', 'challenge', 'science', 'mystery', 
+'famous', 'league', 'memory', 'leather', 'planet', 'software', 'update', 'yellow', 
+'keyboard', 'window']
+
+let gameWords = [...gameWords2];
+input.disabled = true;
+
+function mytimer() {
+    let totalTime = 90;
+let countDown = setInterval(function(){
+  if(totalTime <= 0 ){
+    gameLevel.pause();
+    gameIsOver.play();
+    clearInterval(countDown);
+    timer.innerHTML = `Time Up!! Total Hits ${hits}`;
+    gameOver.style.visibility = 'visible';
+    game.style.display = 'none';
+    words.style.visibility = 'hidden';
+    dialog.showModal();
+    displayInfo();
+  } else {
+    timer.innerHTML = totalTime + " seconds";
+  }
+  totalTime--;
+}, 1000);
+}
+
+
+function getWord(gameWords)
+{
+  let random = Math.floor(Math.random() * gameWords.length);
+  words.innerText = gameWords[random];
+  gameWords.splice(random, 1);
 };
 
-let date = new Date().toDateString().slice(3, 10);
 let hits = 0;
-let perc;
-const player = new Score(date, hits, perc);
 
-function countdownTimer() {
-  let countdown = 90;
-  let countdownInterval = setInterval(() => {
-    countdown--;
-    timer.innerText = `Timer: ${countdown} Seconds`;
-    
-    if(countdown === 0) {
-      music.pause();
-      
-      clearInterval(countdownInterval);
-      
-      score.style.display = 'block'
-      playAgain.style.display = 'block';
-      
-      box.style.display = 'none';
-      word.style.display = 'none';
-      input.style.display = 'none';
-      
-      player.getPercentage();
-      score.innerText = player.getScore();
-    }
-  }, 1000);
+function compare() {
+    let userInput = input.value.toLowerCase();
+    if(userInput === words.innerText) {
+        hits++;
+        onHits.play();
+        hitss.innerText = `Hits : ${hits}`;
+        input.value = '';
+        getWord(gameWords);
+    } 
 }
 
-function randomWord(words) {
-  let random = words[Math.floor(Math.random() * words.length)];
-  return random
-}
-
-play.addEventListener('click', () => {
-  music.play();
-  
-  title.style.display = 'none';
-  play.style.display = 'none';
-  
-  box.style.display = 'block';
-  word.style.display = 'block';
-  input.style.display = 'block';
-  
-  input.focus();
-  
-  countdownTimer();
-  
-  let random = randomWord(words);
-  
-  words.splice(words.indexOf(random), 1);
-  
-  word.innerText = random;
-  input.maxLength = random.length;
+onEvent('keyup', input, function() {
+    compare();
 });
 
-input.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    if (input.value === word.innerText) {
-      correctAnswer.play();
-      
-      let random = randomWord(words);
-      
-      words.splice(words.indexOf(random), 1);
-      
-      input.classList.add('right');
-      
-      setTimeout(() => {
-        input.classList.remove('right');
-      }, 1000);
-      
-      word.innerText = random;
-      input.maxLength = random.length;
-      input.value = '';
-       
-      player.hits++;
-    } else {
-      wrongAnswer.play();
-      
-      input.classList.add('wrong');
-      
-      setTimeout(() => {
-        input.classList.remove('wrong');
-      }, 1000);
-    };
+
+onEvent('click' , btn2,  function() {
+  input.disabled = false;
+    input.focus();
+    words.style.visibility = 'visible';
+    btn2.style.animationPlayState = 'paused';
+    startInfo.style.visibility = 'hidden';
+    gameLevel.play();
+    mytimer();
+    getWord(gameWords);
+    btn2.disabled = true;
+});
+
+onEvent('click' , btn,  function() {
+    gameWords = [...gameWords2];
+    getWord(gameWords);
+    round.style.display = 'inline-block';
+    mesg.style.visibility = 'visible';
+    gameIsOver.pause();
+    gameLoad.play();
+    mesg.innerText = 'Good Luck!'
+    gameOver.style.visibility = 'hidden';
+    setTimeout(() => {
+      round.style.display = 'none';
+        gameLoad.pause();
+        gameLevel.play();
+        input.value = '';
+        hits = 0;
+        hitss.innerText = `Hits : ${hits}`;
+        game.style.display = 'block';
+        input.focus();
+        mesg.style.visibility = 'hidden';
+        startInfo.style.visibility = 'hidden';
+        words.style.visibility = 'visible';
+        mytimer();
+      }, 4000);
+});
+
+function displayInfo() {
+  let date = new Date().toLocaleDateString('en-ca', { year:"numeric", month:"short", day:"numeric"});
+
+  let percentage = ((hits / 90) * 100).toFixed(2);
+  showInfo.innerText = `Percentage: ${percentage} 
+                        Date : ${date} 
+                        Hits : ${hits}`;
+  const savedScores = JSON.parse(localStorage.getItem('savedScores')) || [];
+
+  const result = {
+    score: hits,
+    perc: percentage
   };
+
+  savedScores.push(result);
+  savedScores.sort((a, b) => b.score - a.score);
+  savedScores.splice(9);
+
+  localStorage.setItem('savedScores', JSON.stringify(savedScores))
+
+  list.innerHTML = savedScores.map(result => {
+    return `<li>${result.score} Words ${result.perc}%</li>`
+  }).join('')
+
+}
+
+
+onEvent('click' , btnScore,  function() {
+  dialog.showModal();
+
+  const savedScores = JSON.parse(localStorage.getItem('savedScores'));
+    list.innerHTML = savedScores.map(result => {
+      return `<li>${result.score} Words ${result.perc}%</li>`
+    }).join('')
+
 });
 
-playAgain.addEventListener('click', () => {
-  music.play();
-  score.style.display = 'none';
-  playAgain.style.display = 'none';
-  
-  box.style.display = 'block';
-  word.style.display = 'block';
-  input.style.display = 'block';
-  
-  const words = [
-    'dinosaur', 'love', 'pineapple', 'calendar', 'robot', 'building',
-    'population', 'weather', 'bottle', 'history', 'dream', 'character', 'money',
-    'absolute', 'discipline', 'machine', 'accurate', 'connection', 'rainbow',
-    'bicycle', 'eclipse', 'calculator', 'trouble', 'watermelon', 'developer',
-    'philosophy', 'database', 'periodic', 'capitalism', 'abominable', 'component',
-    'future', 'pasta', 'microwave', 'jungle', 'wallet', 'canada', 'coffee',
-    'beauty', 'agency', 'chocolate', 'eleven', 'technology', 'alphabet',
-    'knowledge', 'magician', 'professor', 'triangle', 'earthquake', 'baseball',
-    'beyond', 'evolution', 'banana', 'perfumer', 'computer', 'management',
-    'discovery', 'ambition', 'music', 'eagle', 'crown', 'chess', 'laptop',
-    'bedroom', 'delivery', 'enemy', 'button', 'superman', 'library', 'unboxing',
-    'bookstore', 'language', 'homework', 'fantastic', 'economy', 'interview',
-    'awesome', 'challenge', 'science', 'mystery', 'famous', 'league', 'memory',
-    'leather', 'planet', 'software', 'update', 'yellow', 'keyboard', 'window'
-  ];
-  
-  player.date = new Date().toDateString().slice(3, 10);
-  player.hits = 0;
-  player.perc;
-  
-  score.innerText = '';
-  
-  input.focus();
-  
-  countdownTimer();
-  
-  let random = randomWord(words);
-  
-  word.innerText = random;
-  input.maxLength = random.length;
-  input.value = '';
+onEvent('click' , dialog, function(event) {
+
+  const rect = this.getBoundingClientRect();
+  if (event.clientY < rect.top || event.clientY > rect.bottom || event.clientX < rect.left || event.clientX > rect.right) {
+      dialog.close();
+  }
+});
+
+onEvent('click' , dialogClose , function() {
+  dialog.close();
 });
